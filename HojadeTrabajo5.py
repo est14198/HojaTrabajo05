@@ -6,27 +6,11 @@
 
 import simpy
 import random
-import time
 
 intervalo = 10
 random_seed = 10
 velocidad_procesador = 1
 cant_instrucciones = 3
-
-class Timer(object):
-    def __init__(self, verbose=False):
-        self.verbose = verbose
-
-    def __enter__(self):
-        self.start = time.time()
-        return self
-
-    def __exit__(self, *args):
-        self.end = time.time()
-        self.secs = self.end - self.start
-        self.msecs = self.secs * 1000  # millisecs
-        if self.verbose:
-            print 'elapsed time: %f ms' % self.msecs
 
 # El proceso "proceso_OS" muestra el comportamiento del sistema operativo
 def proceso_OS (nombre, env, CPU, capacidad_RAM, interval):
@@ -36,6 +20,8 @@ def proceso_OS (nombre, env, CPU, capacidad_RAM, interval):
     cant_memoria = random.randint(1,10)
 
     feew = True
+
+    tiempo = env.now
 
     while (feew):
         if capacidad_RAM.level >= cant_memoria:
@@ -52,27 +38,35 @@ def proceso_OS (nombre, env, CPU, capacidad_RAM, interval):
         with CPU.request() as turno:
                 yield turno
                 print ('%s Entro a procesador' % nombre)
+                tiempoTotal = env.now - tiempo
                 for i in range(cant_instrucciones):
                     yield env.timeout(velocidad_procesador)
                     if (instrucciones_Faltantes <= 1):
                         break
                     else:
                         instrucciones_Faltantes = instrucciones_Faltantes - 1
-                print ('%s Salio del procesador' % nombre)
+                print ('%s Salio del procesador' % (nombre, tiempoTotal))
+                total1 = env.now - tiempoTotal
         if (instrucciones_Faltantes > 1):
             num = random.randint(1,2)
             if (num == 1):
-                print ('%s Entro a waiting' % nombre)
+                print ('%s Entro a waiting' % (nombre, total1))
+                total2 = env.now - total1
                 yield env.timeout(1)
+    totalDia = totalDia + total2 
     print ('%s Terminated' % nombre)
     print ('RAM devuelto: %d' %cant_memoria)
     yield capacidad_RAM.put(cant_memoria)
             
-
 env = simpy.Environment()
 CPU = simpy.Resource(env, capacity = 1)
 capacidad_RAM = simpy.Container(env, 100, init=10)
-random.seed(random_seed) #Fijar inicio de random 
+random.seed(random_seed) #Fijar inicio de random
+
+totalDia = 0
+
 for i in range (10):
     env.process(proceso_OS('Proceso %d' % i, env, CPU , capacidad_RAM, intervalo))
 env.run()
+
+print "Tiempo promedio es: ", totalDia/intervalo
