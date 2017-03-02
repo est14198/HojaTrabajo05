@@ -18,11 +18,7 @@ cantidad = 200
 
 # El proceso "procesos" determina cuantos procesos se envian al algoritmo
 def procesos (env, CPU, capacidad_RAM, interval):
-<<<<<<< HEAD
-    for i in range(200):
-=======
     for i in range(cantidad):
->>>>>>> 45eaf4181998594925e6f163a5daeeded23117cf
         env.process(OS('Proceso %d' % i, env, CPU , capacidad_RAM))
         t = random.expovariate(1.0/interval)
         yield env.timeout(t)
@@ -74,13 +70,8 @@ def OS (nombre, env, CPU, capacidad_RAM):
 
 # Se crea la simulacion 
 env = simpy.Environment()
-<<<<<<< HEAD
 CPU = simpy.Resource(env, capacity = 1)
-capacidad_RAM = simpy.Container(env,200, init=200)
-=======
-CPU = simpy.Resource(env, capacity = 2)
 capacidad_RAM = simpy.Container(env,100, init=100)
->>>>>>> 45eaf4181998594925e6f163a5daeeded23117cf
 random.seed(random_seed) #Fijar inicio de random
 
 totalDia = 0
@@ -88,8 +79,4 @@ totalDia = 0
 env.process(procesos(env, CPU, capacidad_RAM, intervalo))
 env.run()
 
-<<<<<<< HEAD
-print "Tiempo promedio es: ", totalDia/200.0
-=======
 print "Tiempo promedio es: ", totalDia/cantidad
->>>>>>> 45eaf4181998594925e6f163a5daeeded23117cf
